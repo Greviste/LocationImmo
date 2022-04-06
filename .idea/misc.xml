@@ -7,6 +7,12 @@
         <entry key="..\:/AndroidProjects/LocationImmo/app/src/main/res/layout/activity_search.xml" value="0.5541666666666667" />
         <entry key="..\:/AndroidProjects/LocationImmo/app/src/main/res/layout/activity_sign_up.xml" value="0.5541666666666667" />
         <entry key="..\:/AndroidProjects/LocationImmo/app/src/main/res/layout/layout_rental_item.xml" value="0.5401041666666667" />
+        <entry key="app/src/main/res/layout/activity_edit_rental_ad.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.10552536231884058" />
+        <entry key="app/src/main/res/layout/activity_search.xml" value="0.10552536231884058" />
+        <entry key="app/src/main/res/layout/activity_sign_up.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/ad_specs_items.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/layout_rental_item.xml" value="0.10552536231884058" />
       </map>
     </option>
   </component>
