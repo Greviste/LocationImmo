@@ -10,6 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LocationImmo">
         <activity
+            android:name=".ChatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewRentalAdActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditRentalAdActivity"
             android:exported="false" />
         <activity
