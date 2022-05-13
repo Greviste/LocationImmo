@@ -2,8 +2,12 @@ package com.example.locationimmo;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -23,13 +27,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SignUpActivity extends AppCompatActivity {
-    JSONObject db = new JSONObject();
-
     EditText mail;
     EditText pwd_1;
     EditText pwd_2;
     RadioButton[] type;
+    DatabaseAccessService service;
+    ServiceConnection connection = new ServiceConnection() {
 
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder b) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            DatabaseAccessService.LocalBinder binder = (DatabaseAccessService.LocalBinder) b;
+            service = binder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            service = null;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +60,20 @@ public class SignUpActivity extends AppCompatActivity {
                 findViewById(R.id.radioButtonIndividual),
                 findViewById(R.id.radioButtonProfessional),
         };
+    }
 
-        try {
-            db.put("user","");
-            db.put("ad","");;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, DatabaseAccessService.class);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unbindService(connection);
+        service = null;
     }
 
     public HashMap<String, String> getFields() {
@@ -70,60 +94,12 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     public void resetDB(View view){
-        try {
-            System.out.println("Resetting db ...");
-            FileOutputStream out_stream = getApplicationContext().openFileOutput("database.json", Context.MODE_PRIVATE);
-            out_stream.write("".getBytes());
-            out_stream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if(service == null) return;
+        service.resetDB();
     }
 
     public void updateJson(View view) {
-        HashMap<String, String> data = getFields();
-
-        FileInputStream in_stream = null;
-
-        //Read DB
-        try {
-            in_stream = getApplicationContext().openFileInput("database.json");
-            String file_content = "";
-            int current_c;
-            while((current_c = in_stream.read()) != -1){
-                file_content += (char)current_c;
-            }
-            in_stream.close();
-            JSONObject json_fc = new JSONObject(file_content);
-            db.put("user", json_fc.get("user"));
-            System.out.println("DB state before update: " + db.toString());
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        // Update DB
-        try {
-
-            db.accumulate("user", new JSONObject(data));
-            System.out.println("DB after update? " + db.toString());
-            FileOutputStream out_stream = getApplicationContext().openFileOutput("database.json", Context.MODE_PRIVATE);
-            out_stream.write(db.toString().getBytes());
-            out_stream.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
+        if(service == null) return;
+        service.updateJson(getFields());
     }
 }
