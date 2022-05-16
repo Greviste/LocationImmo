@@ -100,6 +100,5 @@ public class SignUpActivity extends AppCompatActivity {
 
     public void updateJson(View view) {
         if(service == null) return;
-        service.updateJson(getFields());
     }
 }
