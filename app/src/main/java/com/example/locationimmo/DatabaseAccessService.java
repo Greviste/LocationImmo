@@ -1,20 +1,18 @@
 package com.example.locationimmo;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.view.View;
+import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import androidx.core.util.Predicate;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.HashMap;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DatabaseAccessService extends Service {
     public class LocalBinder extends Binder {
@@ -24,84 +22,111 @@ public class DatabaseAccessService extends Service {
         }
     }
     private final IBinder binder = new LocalBinder();
-    private JSONObject db = new JSONObject();
-
-    @Override
-    public void onCreate()
-    {
-        super.onCreate();
-
-        try {
-            db.put("user","");
-            db.put("ad","");;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
         return binder;
     }
 
-    public void updateJson(HashMap<String, String> data) {
-        FileInputStream in_stream = null;
 
-        //Read DB
+    private ArrayList<User> users;
+    private ArrayList<ChatMessage> messages;
+    private static class SaveData implements Serializable {
+        User[] users;
+        ChatMessage[] messages;
+    }
+    @Override
+    public void onCreate() {
+        super.onCreate();
         try {
-            in_stream = getApplicationContext().openFileInput("database.json");
-            String file_content = "";
-            int current_c;
-            while((current_c = in_stream.read()) != -1){
-                file_content += (char)current_c;
-            }
-            in_stream.close();
-            JSONObject json_fc = new JSONObject(file_content);
-            db.put("user", json_fc.get("user"));
-            System.out.println("DB state before update: " + db.toString());
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+            ObjectInputStream ois = new ObjectInputStream(openFileInput("database.dat"));
+            SaveData saveData = (SaveData) ois.readObject();
+            users = new ArrayList<>(Arrays.asList(saveData.users));
+            messages = new ArrayList<>(Arrays.asList(saveData.messages));
+            Toast.makeText(this, "Database loaded", Toast.LENGTH_LONG).show();
         }
+        catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Unable to load database, resetting to empty...", Toast.LENGTH_LONG).show();
+            resetDB();
+        }
+    }
 
-        // Update DB
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        SaveData saveData = new SaveData();
+        saveData.users = users.toArray(new User[0]);
+        saveData.messages = messages.toArray(new ChatMessage[0]);
         try {
-
-            db.accumulate("user", new JSONObject(data));
-            System.out.println("DB after update? " + db.toString());
-            FileOutputStream out_stream = getApplicationContext().openFileOutput("database.json", Context.MODE_PRIVATE);
-            out_stream.write(db.toString().getBytes());
-            out_stream.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+            ObjectOutputStream ous = new ObjectOutputStream(openFileOutput("database.dat", MODE_PRIVATE));
+            ous.writeObject(saveData);
+        }
+        catch(Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void resetDB(){
-        try {
-            System.out.println("Resetting db ...");
-            FileOutputStream out_stream = getApplicationContext().openFileOutput("database.json", Context.MODE_PRIVATE);
-            out_stream.write("".getBytes());
-            out_stream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void resetDB() {
+        users = new ArrayList<>();
+        messages = new ArrayList<>();
+    }
+
+    User getNewUser() {
+        User user = new User();
+        users.add(user);
+        return user;
+    }
+
+    User[] getAllUsers() {
+        return users.toArray(new User[0]);
+    }
+
+    User getUserByMailAndPassword(String email, String password) {
+        for(User user : users) {
+            if(user.email.equals(email) && user.password.equals(password)) return user;
         }
+        return null;
+    }
+
+    void postMessage(ChatMessage message) {
+        messages.add(message);
+    }
+
+    User[] getOpenConversationsFor(User user) {
+        ArrayList<User> inConv = new ArrayList<>();
+        for(ChatMessage message : messages) {
+            User toAdd = null;
+            if(message.from == user) toAdd = message.to;
+            if(message.to == user) toAdd = message.from;
+            if(toAdd != null && !inConv.contains(toAdd)) {
+                inConv.add(toAdd);
+            }
+        }
+        return inConv.toArray(new User[0]);
+    }
+
+    ChatMessage[] getConversation(User a, User b) {
+        ArrayList<ChatMessage> conv = new ArrayList<>();
+        for(ChatMessage message : messages) {
+            if(message.from != a && message.from != b || message.to != a && message.to != b) continue;
+            conv.add(message);
+        }
+        return conv.toArray(new ChatMessage[0]);
+    }
+
+    RentalAd[] selectRentalAds(Predicate<RentalAd> predicate) {
+        ArrayList<RentalAd> ads = new ArrayList<>();
+        for(User user : users) {
+            if(user.type == UserType.Client) continue;
+            for(RentalAd ad : user.ads) {
+                if(predicate.test(ad)) ads.add(ad);
+            }
+        }
+        return ads.toArray(new RentalAd[0]);
+    }
+
+    RentalAd[] getAllRentalAds() {
+        return selectRentalAds(ignored -> true);
     }
 }
