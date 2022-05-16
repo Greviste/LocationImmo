@@ -72,28 +72,28 @@ public class DatabaseAccessService extends Service {
         messages = new ArrayList<>();
     }
 
-    User getNewUser() {
+    public User getNewUser() {
         User user = new User();
         users.add(user);
         return user;
     }
 
-    User[] getAllUsers() {
+    public User[] getAllUsers() {
         return users.toArray(new User[0]);
     }
 
-    User getUserByMailAndPassword(String email, String password) {
+    public User getUserByMailAndPassword(String email, String password) {
         for(User user : users) {
             if(user.email.equals(email) && user.password.equals(password)) return user;
         }
         return null;
     }
 
-    void postMessage(ChatMessage message) {
+    public void postMessage(ChatMessage message) {
         messages.add(message);
     }
 
-    User[] getOpenConversationsFor(User user) {
+    public User[] getOpenConversationsFor(User user) {
         ArrayList<User> inConv = new ArrayList<>();
         for(ChatMessage message : messages) {
             User toAdd = null;
@@ -106,7 +106,7 @@ public class DatabaseAccessService extends Service {
         return inConv.toArray(new User[0]);
     }
 
-    ChatMessage[] getConversation(User a, User b) {
+    public ChatMessage[] getConversation(User a, User b) {
         ArrayList<ChatMessage> conv = new ArrayList<>();
         for(ChatMessage message : messages) {
             if(message.from != a && message.from != b || message.to != a && message.to != b) continue;
@@ -115,7 +115,7 @@ public class DatabaseAccessService extends Service {
         return conv.toArray(new ChatMessage[0]);
     }
 
-    RentalAd[] selectRentalAds(Predicate<RentalAd> predicate) {
+    public RentalAd[] selectRentalAds(Predicate<RentalAd> predicate) {
         ArrayList<RentalAd> ads = new ArrayList<>();
         for(User user : users) {
             if(user.type == UserType.Client) continue;
@@ -126,7 +126,7 @@ public class DatabaseAccessService extends Service {
         return ads.toArray(new RentalAd[0]);
     }
 
-    RentalAd[] getAllRentalAds() {
+    public RentalAd[] getAllRentalAds() {
         return selectRentalAds(ignored -> true);
     }
 }
