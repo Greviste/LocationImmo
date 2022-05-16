@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">LocationImmo</string>
     <string name="add_str">Ajouter</string>
-
+    <string name="send_str">Valider</string>
 </resources>

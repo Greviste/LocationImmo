@@ -74,6 +74,7 @@ public class DatabaseAccessService extends Service {
 
     public User getNewUser() {
         User user = new User();
+        user.ads = new ArrayList<>();
         users.add(user);
         return user;
     }

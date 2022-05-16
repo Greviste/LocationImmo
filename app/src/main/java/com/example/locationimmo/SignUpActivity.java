@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -31,6 +32,7 @@ public class SignUpActivity extends AppCompatActivity {
     EditText pwd_1;
     EditText pwd_2;
     RadioButton[] type;
+    Button signup_btn;
     DatabaseAccessService service;
     ServiceConnection connection = new ServiceConnection() {
 
@@ -48,10 +50,30 @@ public class SignUpActivity extends AppCompatActivity {
         }
     };
 
+    public HashMap<String, String> getFields() {
+        HashMap<String, String> fields = new HashMap<String, String>();
+        fields.put("e-mail", mail.getText().toString());
+        fields.put("pwd", pwd_1.getText().toString());
+        int i = 0;
+        for(RadioButton radio : type) {
+            if(radio.isChecked()){
+                fields.put("type", Integer.toString(i));
+            }
+            i +=1;
+        }
+
+        for(Map.Entry<String, String> entry : fields.entrySet()){
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+
+        return fields;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+
         mail = findViewById(R.id.editTextTextEmailAddressSU);
         pwd_1 = findViewById(R.id.editTextTextPasswordSU);
         pwd_2 = findViewById(R.id.editTextTextPasswordConfirm);
@@ -60,6 +82,30 @@ public class SignUpActivity extends AppCompatActivity {
                 findViewById(R.id.radioButtonIndividual),
                 findViewById(R.id.radioButtonProfessional),
         };
+
+        signup_btn = findViewById(R.id.signup_btn);
+        signup_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //UNCOMMENT
+                if(pwd_1.getText().toString().equals(pwd_2.getText().toString())) {
+                    HashMap<String, String> userInfos = getFields();
+                    User newUser = service.getNewUser();
+                    newUser.email = userInfos.get("e-mail");
+                    newUser.password = userInfos.get("pwd");
+
+                    int type = Integer.parseInt(userInfos.get("type"));
+                    newUser.type = UserType.values()[type];
+
+                    Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+                    intent.putExtra("connected", newUser);
+                    startActivity(intent);
+                }
+
+
+            }
+        });
+
     }
 
     @Override
@@ -76,22 +122,7 @@ public class SignUpActivity extends AppCompatActivity {
         service = null;
     }
 
-    public HashMap<String, String> getFields() {
-        HashMap<String, String> fields = new HashMap<String, String>();
-        fields.put("e-mail", mail.getText().toString());
-        fields.put("pwd", pwd_1.getText().toString());
-        for(RadioButton radio : type) {
-            if(radio.isChecked()){
-                fields.put("type", radio.getText().toString());
-            }
-        }
 
-        for(Map.Entry<String, String> entry : fields.entrySet()){
-            System.out.println(entry.getKey() + ": " + entry.getValue());
-        }
-
-        return fields;
-    }
 
     public void resetDB(View view){
         if(service == null) return;

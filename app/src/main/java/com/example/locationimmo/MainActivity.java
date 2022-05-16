@@ -2,8 +2,12 @@ package com.example.locationimmo;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -17,9 +21,28 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
-    JSONObject db = new JSONObject();
     EditText mail;
     EditText pwd;
+    User user;
+    DatabaseAccessService service;
+    ServiceConnection connection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder b) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            DatabaseAccessService.LocalBinder binder = (DatabaseAccessService.LocalBinder) b;
+            service = binder.getService();
+
+            for(RentalAd ad : service.getAllRentalAds())
+                System.out.println("AD IN BD: " + ad.title);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            service = null;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +52,20 @@ public class MainActivity extends AppCompatActivity {
 
         mail = findViewById(R.id.editTextTextEmailAddress);
         pwd = findViewById(R.id.editTextTextPassword);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, DatabaseAccessService.class);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unbindService(connection);
+        service = null;
     }
 
     public void loadSearch(View view) {
@@ -43,59 +80,23 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public boolean checkAuth(EditText mail, EditText pwd) {
-        String mail_str = mail.getText().toString();
-        String pwd_str = pwd.getText().toString();
-        boolean grant_access = false;
+    public boolean checkAuth() {
+        String str_mail = mail.getText().toString();
+        String str_pwd = pwd.getText().toString();
 
-        System.out.println(db.names());
+        user = service.getUserByMailAndPassword(str_mail, str_pwd);
 
-        try {
-            JSONArray usr_arr = db.getJSONArray("user");
-            for(int i = 1; i < usr_arr.length(); i ++){
-                JSONObject usr = usr_arr.getJSONObject(i);
-
-                if(usr.get("e-mail").equals(mail_str) && usr.get("pwd").equals(pwd_str))
-                    grant_access = true;
-
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return grant_access;
+        return user != null;
     }
 
     public void signIn(View view) {
-        FileInputStream in_stream = null;
-
-        //Read DB
-        try {
-            in_stream = getApplicationContext().openFileInput("database.json");
-            String file_content = "";
-            int current_c;
-            while((current_c = in_stream.read()) != -1){
-                file_content += (char)current_c;
-            }
-            in_stream.close();
-            db = new JSONObject(file_content);
-
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("DB LOADED: " + db.toString());
         //authentification
-        boolean granted = checkAuth(mail, pwd);
+        boolean granted = checkAuth();
 
         if(granted){
             System.out.println("ACCESS GRANTED");
             Intent intent = new Intent(this, EditRentalAdActivity.class);
+            intent.putExtra("connected", user);
             startActivity(intent);
         }else{
             Toast tst = new Toast(this);
