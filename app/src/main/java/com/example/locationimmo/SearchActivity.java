@@ -10,6 +10,13 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.PopupMenu;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +59,32 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
+    private void showMenu(View v, int menu){
+        PopupMenu popup = (PopupMenu) new PopupMenu(this, v);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.popup_menu, popup.getMenu());
+
+        if(user.type.ordinal() == 0){
+            //client (acheteur) -> annonces sauvegardées
+            popup.getMenu().removeItem(R.id.show_posted);
+        }else{
+            //annonces déposées
+            popup.getMenu().removeItem(R.id.show_fav);
+        }
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                //Si click sur un item != R.id.show_all -> afficher la liste des ads de l'utilisateur
+                System.out.println("CLICKED ON " + menuItem.toString());
+                return false;
+            }
+        });
+
+
+        popup.show();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,9 +93,25 @@ public class SearchActivity extends AppCompatActivity {
         user = (User) getIntent().getSerializableExtra("connected");
         if(user != null){
             System.out.println("USER " + user.email);
-            for(RentalAd ad : user.ads)
-                System.out.println(ad.title);
+            /*for(RentalAd ad : user.ads)
+                System.out.println(ad.title);*/
         }
+
+        //Display en fonction du type de l'utilisateur
+        FloatingActionButton floating_btn = findViewById(R.id.user_search_btn);
+
+        if(user == null){
+            floating_btn.hide();
+        }
+
+
+        floating_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                showMenu(view, R.menu.popup_menu);
+            }
+        });
 
     }
 

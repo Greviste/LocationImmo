@@ -19,14 +19,14 @@
 
     <com.google.android.material.slider.RangeSlider
         android:id="@+id/sliderPriceRange"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="232dp"
+        android:layout_height="75dp"
         android:valueFrom="0"
         android:valueTo="1000"
         app:labelBehavior="withinBounds"
         app:layout_constraintBottom_toTopOf="@+id/editTextTextCity"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.2"
         app:layout_constraintStart_toEndOf="@+id/textView"
         app:layout_constraintTop_toBottomOf="@+id/recyclerView"
         app:values="@array/initial_price_range"
@@ -66,13 +66,26 @@
 
     <Button
         android:id="@+id/buttonSearch"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="169dp"
+        android:layout_height="41dp"
         android:text="Rechercher"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextTextCity" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/user_search_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        app:backgroundTint="@color/purple_200"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/sliderPriceRange"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView"
+        app:layout_constraintVertical_bias="0.25"
+        app:srcCompat="@android:drawable/ic_menu_edit"
+        tools:ignore="SpeakableTextPresentCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

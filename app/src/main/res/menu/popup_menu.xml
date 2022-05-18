@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/show_all"
+        android:title="@string/show_all_str" />
+
+    <item
+        android:id="@+id/show_fav"
+        android:title="@string/show_saved_str" />
+
+    <item
+        android:id="@+id/show_posted"
+        android:title="@string/show_posted_str" />
+</menu>

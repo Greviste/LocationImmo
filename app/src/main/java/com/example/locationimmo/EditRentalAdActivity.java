@@ -105,12 +105,20 @@ public class EditRentalAdActivity extends AppCompatActivity {
         send_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String price_input_str = price_tv.getEditText().getText().toString();
                 // add ad to user, user to ad -> switch view to user's ads list.
                 String city_str = city_tv.getEditText().getText().toString();
                 String avail_str = availability_tv.getText().toString();
                 String title_str = title_tv.getEditText().getText().toString();
                 String specs_str = classification_drop_down.getText().toString();
-                Float price = Float.parseFloat(price_tv.getEditText().getText().toString());
+                Float price;
+
+                if(price_input_str.isEmpty()){
+                    price = (float) 0;
+                }else{
+                     price = Float.parseFloat(price_input_str);
+                }
+/*
                 RentalAd new_ad = new RentalAd();
                 new_ad.address = city_str;
                 new_ad.availability = avail_str;
@@ -119,13 +127,6 @@ public class EditRentalAdActivity extends AppCompatActivity {
                 new_ad.price = price;
                 new_ad.owner = user;
 
-                if(user.ads == null){
-                    ArrayList<RentalAd> new_ads = new ArrayList<>();
-                    new_ads.add(new_ad);
-                    user.ads = new_ads;
-                }else{
-                    user.ads.add(new_ad);
-                }
 
                 System.out.println("USER MAIL " + user.email);
                 System.out.println(city_str);
@@ -134,9 +135,12 @@ public class EditRentalAdActivity extends AppCompatActivity {
                 System.out.println(specs_str);
                 System.out.println(price);
 
-       /*         Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+                int nb_ads = service.getAllRentalAds().length;
+                int nb_users = service.getAllUsers().length;
+                System.out.println("NB ADS?" + nb_ads + " NB USERS? " + nb_users);*/
+                Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
                 intent.putExtra("connected", user);
-                startActivity(intent);*/
+                startActivity(intent);
             }
         });
     }

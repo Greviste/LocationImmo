@@ -7,5 +7,5 @@ public class User implements Serializable {
     public String email;
     public String password;
     public UserType type;
-    public ArrayList<RentalAd> ads = new ArrayList<RentalAd>();
+    public ArrayList<RentalAd> ads;
 }

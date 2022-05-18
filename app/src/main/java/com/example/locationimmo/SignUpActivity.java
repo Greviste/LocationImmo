@@ -96,7 +96,7 @@ public class SignUpActivity extends AppCompatActivity {
 
                     int type = Integer.parseInt(userInfos.get("type"));
                     newUser.type = UserType.values()[type];
-
+                    System.out.println("TYPE: " + UserType.values()[type]);
                     Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
                     intent.putExtra("connected", newUser);
                     startActivity(intent);
