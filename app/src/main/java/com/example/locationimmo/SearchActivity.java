@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -34,6 +35,25 @@ public class SearchActivity extends AppCompatActivity {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             DatabaseAccessService.LocalBinder binder = (DatabaseAccessService.LocalBinder) b;
             service = binder.getService();
+
+            user = service.getUserByMailAndPassword(getIntent().getStringExtra("connectedMail"), getIntent().getStringExtra("connectedPassword"));
+
+            //Display en fonction du type de l'utilisateur
+            FloatingActionButton floating_btn = findViewById(R.id.user_search_btn);
+
+            if(user == null){
+                floating_btn.hide();
+            }
+
+
+            floating_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    showMenu(view, R.menu.popup_menu);
+                }
+            });
+
             RecyclerView recyclerView = findViewById(R.id.recyclerView);
             fetch_ads();
 
@@ -89,30 +109,6 @@ public class SearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-
-        user = (User) getIntent().getSerializableExtra("connected");
-        if(user != null){
-            System.out.println("USER " + user.email);
-            /*for(RentalAd ad : user.ads)
-                System.out.println(ad.title);*/
-        }
-
-        //Display en fonction du type de l'utilisateur
-        FloatingActionButton floating_btn = findViewById(R.id.user_search_btn);
-
-        if(user == null){
-            floating_btn.hide();
-        }
-
-
-        floating_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                showMenu(view, R.menu.popup_menu);
-            }
-        });
-
     }
 
     @Override

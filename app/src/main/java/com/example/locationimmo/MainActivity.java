@@ -96,7 +96,8 @@ public class MainActivity extends AppCompatActivity {
         if(granted){
             System.out.println("ACCESS GRANTED");
             Intent intent = new Intent(this, EditRentalAdActivity.class);
-            intent.putExtra("connected", user);
+            intent.putExtra("connectedMail", user.email);
+            intent.putExtra("connectedPassword", user.password);
             startActivity(intent);
         }else{
             Toast tst = new Toast(this);

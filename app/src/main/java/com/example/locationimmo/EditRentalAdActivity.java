@@ -28,7 +28,6 @@ public class EditRentalAdActivity extends AppCompatActivity {
     String[] classification_items = {"Appartement", "Studio", "Maison", "Loft"};
     AutoCompleteTextView classification_drop_down;
     ArrayAdapter<String> adapter;
-    User user;
     ImageButton select_range_btn;
     TextView availability_tv;
     TextInputLayout title_tv;
@@ -66,11 +65,6 @@ public class EditRentalAdActivity extends AppCompatActivity {
         desc_tv= findViewById(R.id.description_input);
         price_tv= findViewById(R.id.price_input);
 
-
-
-        //User informations
-        user = (User) getIntent().getSerializableExtra("connected");
-
         //Drop-down menu
         adapter = new ArrayAdapter<String>(this, R.layout.ad_specs_item, classification_items);
         classification_drop_down = findViewById(R.id.classif_dd);
@@ -105,6 +99,10 @@ public class EditRentalAdActivity extends AppCompatActivity {
         send_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(service == null) return;
+
+                User user = service.getUserByMailAndPassword(getIntent().getStringExtra("connectedMail"), getIntent().getStringExtra("connectedPassword"));
+
                 String price_input_str = price_tv.getEditText().getText().toString();
                 // add ad to user, user to ad -> switch view to user's ads list.
                 String city_str = city_tv.getEditText().getText().toString();
@@ -118,7 +116,7 @@ public class EditRentalAdActivity extends AppCompatActivity {
                 }else{
                      price = Float.parseFloat(price_input_str);
                 }
-/*
+
                 RentalAd new_ad = new RentalAd();
                 new_ad.address = city_str;
                 new_ad.availability = avail_str;
@@ -127,19 +125,11 @@ public class EditRentalAdActivity extends AppCompatActivity {
                 new_ad.price = price;
                 new_ad.owner = user;
 
+                user.ads.add(new_ad);
 
-                System.out.println("USER MAIL " + user.email);
-                System.out.println(city_str);
-                System.out.println(avail_str);
-                System.out.println(title_str);
-                System.out.println(specs_str);
-                System.out.println(price);
-
-                int nb_ads = service.getAllRentalAds().length;
-                int nb_users = service.getAllUsers().length;
-                System.out.println("NB ADS?" + nb_ads + " NB USERS? " + nb_users);*/
                 Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
-                intent.putExtra("connected", user);
+                intent.putExtra("connectedMail", user.email);
+                intent.putExtra("connectedPassword", user.password);
                 startActivity(intent);
             }
         });
