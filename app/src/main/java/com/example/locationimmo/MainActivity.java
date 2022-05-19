@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(granted){
             System.out.println("ACCESS GRANTED");
-            Intent intent = new Intent(this, EditRentalAdActivity.class);
+            Intent intent = new Intent(this, SearchActivity.class);
             intent.putExtra("connectedMail", user.email);
             intent.putExtra("connectedPassword", user.password);
             startActivity(intent);

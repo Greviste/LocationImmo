@@ -1,5 +1,6 @@
 package com.example.locationimmo;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,23 +11,23 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.view.Menu;
+import android.os.PersistableBundle;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity implements RecyclerInterface{
     //Load toutes les activitées de la bd
-    ArrayList<RentalAd> rental_ads_list = new ArrayList<>();
+    ArrayList<RentalAd> rental_ads_list;
     User user;
     DatabaseAccessService service;
+    RecyclerAdapter adapter;
+
     ServiceConnection connection = new ServiceConnection() {
 
         @Override
@@ -39,14 +40,29 @@ public class SearchActivity extends AppCompatActivity {
             user = service.getUserByMailAndPassword(getIntent().getStringExtra("connectedMail"), getIntent().getStringExtra("connectedPassword"));
 
             //Display en fonction du type de l'utilisateur
-            FloatingActionButton floating_btn = findViewById(R.id.user_search_btn);
+            FloatingActionButton floating_add_btn = findViewById(R.id.ad_add_btn);
+            FloatingActionButton floating_search_btn = findViewById(R.id.user_search_btn);
 
             if(user == null){
-                floating_btn.hide();
+                floating_search_btn.hide();
+                floating_add_btn.hide();
+            }else{
+                if(user.type.ordinal() == 0)
+                    floating_add_btn.hide();
             }
 
+            floating_add_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getApplicationContext(), EditRentalAdActivity.class);
+                    intent.putExtra("connectedMail", user.email);
+                    intent.putExtra("connectedPassword", user.password);
+                    startActivity(intent);
+                }
+            });
 
-            floating_btn.setOnClickListener(new View.OnClickListener() {
+
+            floating_search_btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
@@ -57,9 +73,7 @@ public class SearchActivity extends AppCompatActivity {
             RecyclerView recyclerView = findViewById(R.id.recyclerView);
             fetch_ads();
 
-            System.out.println("TAILKLLE: " + rental_ads_list.size());
-
-            RecyclerAdapter adapter = new RecyclerAdapter(rental_ads_list);
+            adapter.updateData(rental_ads_list);
             recyclerView.setAdapter(adapter);
             recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
@@ -72,11 +86,17 @@ public class SearchActivity extends AppCompatActivity {
     };
 
     public void fetch_ads(){
+        if(rental_ads_list == null)
+            rental_ads_list = new ArrayList<RentalAd>();
+
         RentalAd[] ads = service.getAllRentalAds();
-        for(RentalAd ad: ads){
-            rental_ads_list.add(ad);
-            System.out.println("RENTAL " + ad.title);
+        for(RentalAd ad : ads){
+            if(!rental_ads_list.contains(ad)){
+                rental_ads_list.add(ad);
+            }
+
         }
+
     }
 
     private void showMenu(View v, int menu){
@@ -109,6 +129,14 @@ public class SearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+/*
+        fetch_ads();
+*/
+
+        adapter = new RecyclerAdapter(this);
+        /*recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));*/
     }
 
     @Override
@@ -116,7 +144,8 @@ public class SearchActivity extends AppCompatActivity {
         super.onStart();
         Intent intent = new Intent(this, DatabaseAccessService.class);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
-
+        boolean b = service != null;
+        System.out.println("SEARCH STARTING, SERVICE? " + b );
     }
 
     @Override
@@ -126,5 +155,29 @@ public class SearchActivity extends AppCompatActivity {
         service = null;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        System.out.println("RESUME SEARCH ACTIVITY?");
 
+
+    }
+
+    @Override
+    public void onItemClick(int pos) {
+        RentalAd clicked_ad = rental_ads_list.get(pos);
+
+        Intent intent = new Intent(this, ViewRentalAdActivity.class);
+        intent.putExtra("title", clicked_ad.title);
+        intent.putExtra("city", clicked_ad.address);
+        intent.putExtra("price", clicked_ad.price.toString());
+        intent.putExtra("description", clicked_ad.description);
+
+        //client -> possibilité de save l'annonce
+        if(user.type.ordinal() == 0){
+            intent.putExtra("connectedMail", user.email);
+            intent.putExtra("connectedPassword", user.password);
+        }
+        startActivity(intent);
+    }
 }

@@ -2,6 +2,7 @@ package com.example.locationimmo;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 public class RentalAd implements Serializable {
     public String title, description, specs;
@@ -10,4 +11,16 @@ public class RentalAd implements Serializable {
     public ContactType contact;
     public Float price;
     public User owner;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        RentalAd rentalAd = (RentalAd) o;
+        return Objects.equals(title, rentalAd.title) && Objects.equals(description, rentalAd.description) && Objects.equals(specs, rentalAd.specs);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, description, specs, availability, address, contact, price, owner);
+    }
 }
