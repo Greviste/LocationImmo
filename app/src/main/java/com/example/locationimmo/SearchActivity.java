@@ -15,11 +15,15 @@ import android.os.PersistableBundle;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.PopupMenu;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.slider.RangeSlider;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class SearchActivity extends AppCompatActivity implements RecyclerInterface{
     //Load toutes les activitées de la bd
@@ -117,6 +121,35 @@ public class SearchActivity extends AppCompatActivity implements RecyclerInterfa
             public boolean onMenuItemClick(MenuItem menuItem) {
                 //Si click sur un item != R.id.show_all -> afficher la liste des ads de l'utilisateur
                 System.out.println("CLICKED ON " + menuItem.toString());
+                if(menuItem.getItemId() == R.id.show_posted || menuItem.getItemId() == R.id.show_fav){
+                    //Filtre: ne montrer que les annonces liées a l'utilisateur
+                    ArrayList<RentalAd> filtered = new ArrayList<>();
+                    for(RentalAd ad : rental_ads_list){
+                        if(ad.owner.equals(user))
+                            filtered.add(ad);
+                    }
+
+                    rental_ads_list.clear();
+                    rental_ads_list.addAll(filtered);
+                    adapter.updateData(rental_ads_list);
+
+
+                    RecyclerView recyclerView = findViewById(R.id.recyclerView);
+
+                    adapter.updateData(rental_ads_list);
+                    recyclerView.setAdapter(adapter);
+/*
+                    recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+*/
+
+                }else{
+                    //click sur show all
+                    fetch_ads();
+                    adapter.updateData(rental_ads_list);
+                    RecyclerView recyclerView = findViewById(R.id.recyclerView);
+                    adapter.updateData(rental_ads_list);
+                    recyclerView.setAdapter(adapter);
+                }
                 return false;
             }
         });
@@ -130,13 +163,36 @@ public class SearchActivity extends AppCompatActivity implements RecyclerInterfa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
-/*
-        fetch_ads();
-*/
-
         adapter = new RecyclerAdapter(this);
-        /*recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));*/
+
+        EditText city_input = findViewById(R.id.editTextTextCity);
+        RangeSlider price_slider = findViewById(R.id.sliderPriceRange);
+
+        Button search_btn = findViewById(R.id.buttonSearch);
+        search_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                float min, max;
+                min = price_slider.getValues().get(0);
+                max = price_slider.getValues().get(1);
+                String city_str = city_input.getText().toString();
+                RentalAd[] filtered_ads;
+
+                if(min == max && max == 0){
+                    filtered_ads = service.selectRentalAds(ad -> ad.address.equals(city_str));
+                }else{
+                    filtered_ads = service.selectRentalAds(ad -> ad.price >= min && ad.price <= max || ad.address.equals(city_str));
+                }
+
+                rental_ads_list.clear();
+                rental_ads_list.addAll(Arrays.asList(filtered_ads));
+
+                adapter.updateData(rental_ads_list);
+                RecyclerView recyclerView = findViewById(R.id.recyclerView);
+                adapter.updateData(rental_ads_list);
+                recyclerView.setAdapter(adapter);
+            }
+        });
     }
 
     @Override
@@ -158,9 +214,6 @@ public class SearchActivity extends AppCompatActivity implements RecyclerInterfa
     @Override
     protected void onResume() {
         super.onResume();
-        System.out.println("RESUME SEARCH ACTIVITY?");
-
-
     }
 
     @Override
@@ -174,10 +227,14 @@ public class SearchActivity extends AppCompatActivity implements RecyclerInterfa
         intent.putExtra("description", clicked_ad.description);
 
         //client -> possibilité de save l'annonce
-        if(user.type.ordinal() == 0){
-            intent.putExtra("connectedMail", user.email);
-            intent.putExtra("connectedPassword", user.password);
+        if(user != null){
+            if(user.type.ordinal() == 0){
+                intent.putExtra("connectedMail", user.email);
+                intent.putExtra("connectedPassword", user.password);
+            }
         }
+
         startActivity(intent);
+
     }
 }

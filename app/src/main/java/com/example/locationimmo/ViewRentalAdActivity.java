@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 public class ViewRentalAdActivity extends AppCompatActivity {
     User user;
+    ArrayList<String> ad_data = new ArrayList<>();
     DatabaseAccessService service;
     ServiceConnection connection = new ServiceConnection() {
 
@@ -27,6 +28,12 @@ public class ViewRentalAdActivity extends AppCompatActivity {
             service = binder.getService();
             user = service.getUserByMailAndPassword(getIntent().getStringExtra("connectedMail"), getIntent().getStringExtra("connectedPassword"));
 
+            Button save_btn = findViewById(R.id.buttonSave);
+            if(user == null){
+                save_btn.setVisibility(View.GONE);
+            }else if(user.type.ordinal() == 1 || user.type.ordinal() == 2){
+                save_btn.setVisibility(View.GONE);
+            }
 
         }
 
@@ -47,15 +54,15 @@ public class ViewRentalAdActivity extends AppCompatActivity {
         tv_arr.add(findViewById(R.id.textViewDesc));
         tv_arr.add(findViewById(R.id.textViewPrice));
 
-        ArrayList<String> data = new ArrayList<>();
-        data.add(getIntent().getStringExtra("title"));
-        data.add(getIntent().getStringExtra("city"));
-        data.add(getIntent().getStringExtra("description"));
-        data.add(getIntent().getStringExtra("price"));
+
+        ad_data.add(getIntent().getStringExtra("title"));
+        ad_data.add(getIntent().getStringExtra("city"));
+        ad_data.add(getIntent().getStringExtra("description"));
+        ad_data.add(getIntent().getStringExtra("price"));
 
 
         for(int i = 0; i < tv_arr.size(); i ++){
-            tv_arr.get(i).setText(data.get(i));
+            tv_arr.get(i).setText(ad_data.get(i));
         }
 
         Button save_btn = findViewById(R.id.buttonSave);
@@ -63,6 +70,21 @@ public class ViewRentalAdActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // add rentalAd to user, user to rental owner
+
+                RentalAd ad_to_save = service.selectRentalAds(
+                        ad -> ad.title.equals(ad_data.get(0)) &&
+                        ad.address.equals(ad_data.get(1)) &&
+                        ad.description.equals(ad_data.get(2)) &&
+                        ad.price == Float.parseFloat(ad_data.get(3))
+                )[0];
+
+                ad_to_save.owner = user;
+                user.ads.add(ad_to_save);
+
+                Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+                intent.putExtra("connectedMail", user.email);
+                intent.putExtra("connectedPassword", user.password);
+                startActivity(intent);
             }
         });
 

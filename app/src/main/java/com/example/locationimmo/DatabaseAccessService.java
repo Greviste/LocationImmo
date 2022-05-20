@@ -50,6 +50,7 @@ public class DatabaseAccessService extends Service {
             Toast.makeText(this, "Unable to load database, resetting to empty...", Toast.LENGTH_LONG).show();
             resetDB();
         }
+
     }
 
     @Override

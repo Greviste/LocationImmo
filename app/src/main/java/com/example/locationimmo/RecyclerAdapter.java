@@ -80,17 +80,19 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Search
     }
 
     public void updateData(ArrayList<RentalAd> rental_ads){
-        if(rental_ads_list != null){
+/*        if(rental_ads_list != null){
             System.out.println("LIST IN ADAPTER SZ " + rental_ads_list.size());
             for(RentalAd ad : rental_ads){
                 if(!rental_ads_list.contains(ad)){
                     rental_ads_list.add(ad);
                 }
             }
-        }else{
+        }else{*/
             rental_ads_list = rental_ads;
 
+/*
         }
+*/
     }
 
 }

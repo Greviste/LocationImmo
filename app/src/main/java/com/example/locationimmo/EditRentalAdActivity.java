@@ -109,6 +109,7 @@ public class EditRentalAdActivity extends AppCompatActivity {
                 String avail_str = availability_tv.getText().toString();
                 String title_str = title_tv.getEditText().getText().toString();
                 String specs_str = classification_drop_down.getText().toString();
+                String description_str = desc_tv.getEditText().getText().toString();
                 Float price;
 
                 if(price_input_str.isEmpty()){
@@ -123,9 +124,13 @@ public class EditRentalAdActivity extends AppCompatActivity {
                 new_ad.title = title_str;
                 new_ad.specs = specs_str;
                 new_ad.price = price;
-                new_ad.owner = user;
+                new_ad.description = description_str;
 
-                user.ads.add(new_ad);
+                if(!user.ads.contains(new_ad)){
+                    new_ad.owner = user;
+                    user.ads.add(new_ad);
+                }
+
 
                 Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
                 intent.putExtra("connectedMail", user.email);
