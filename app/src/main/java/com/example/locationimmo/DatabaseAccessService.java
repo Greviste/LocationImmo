@@ -91,6 +91,13 @@ public class DatabaseAccessService extends Service {
         return null;
     }
 
+    public User getUserByMail(String email) {
+        for(User user : users) {
+            if(user.email.equals(email) ) return user;
+        }
+        return null;
+    }
+
     public void postMessage(ChatMessage message) {
         messages.add(message);
     }

@@ -5,6 +5,10 @@
     <string name="show_all_str">Tout voir</string>
     <string name="show_saved_str">Annonces sauvegardées</string>
     <string name="show_posted_str">Annonces postées</string>
+    <string name="messages_btn">Conversations</string>
+    <string name="message">message</string>
+
+
 
 
 </resources>

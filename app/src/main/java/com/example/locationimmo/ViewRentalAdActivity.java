@@ -17,6 +17,8 @@ import java.util.ArrayList;
 public class ViewRentalAdActivity extends AppCompatActivity {
     User user;
     ArrayList<String> ad_data = new ArrayList<>();
+    Button save_btn;
+    Button msg_btn;
     DatabaseAccessService service;
     ServiceConnection connection = new ServiceConnection() {
 
@@ -28,11 +30,16 @@ public class ViewRentalAdActivity extends AppCompatActivity {
             service = binder.getService();
             user = service.getUserByMailAndPassword(getIntent().getStringExtra("connectedMail"), getIntent().getStringExtra("connectedPassword"));
 
-            Button save_btn = findViewById(R.id.buttonSave);
+/*            save_btn = findViewById(R.id.buttonSave);
+            msg_btn = findViewById(R.id.buttonContact);*/
+
             if(user == null){
+                System.out.println("USER NULL");
                 save_btn.setVisibility(View.GONE);
+                msg_btn.setVisibility(View.GONE);
             }else if(user.type.ordinal() == 1 || user.type.ordinal() == 2){
                 save_btn.setVisibility(View.GONE);
+                msg_btn.setText(R.string.messages_btn);
             }
 
         }
@@ -47,6 +54,8 @@ public class ViewRentalAdActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_rental_ad);
 
+        save_btn = findViewById(R.id.buttonSave);
+        msg_btn = findViewById(R.id.buttonContact);
 
         ArrayList<TextView> tv_arr = new ArrayList<TextView>();
         tv_arr.add(findViewById(R.id.textViewTitle));
@@ -65,7 +74,6 @@ public class ViewRentalAdActivity extends AppCompatActivity {
             tv_arr.get(i).setText(ad_data.get(i));
         }
 
-        Button save_btn = findViewById(R.id.buttonSave);
         save_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -84,6 +92,33 @@ public class ViewRentalAdActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
                 intent.putExtra("connectedMail", user.email);
                 intent.putExtra("connectedPassword", user.password);
+                startActivity(intent);
+            }
+        });
+
+        msg_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent;
+                if(user.type.ordinal() == 1 || user.type.ordinal() == 2){
+                    intent = new Intent(getApplicationContext(), ConversationsActivity.class);
+                }else{
+                    intent = new Intent(getApplicationContext(), ChatActivity.class);
+                }
+                intent.putExtra("us_mail", user.email);
+                intent.putExtra("us_password", user.password);
+
+                RentalAd ad_displayed = service.selectRentalAds(
+                        ad -> ad.title.equals(ad_data.get(0)) &&
+                                ad.address.equals(ad_data.get(1)) &&
+                                ad.description.equals(ad_data.get(2)) &&
+                                ad.price == Float.parseFloat(ad_data.get(3))
+                )[0];
+                User tenant = ad_displayed.owner;
+                System.out.println("THEM MAIL  " + tenant.email);
+                intent.putExtra("them_mail", tenant.email);
+                intent.putExtra("them_password", tenant.password);
+
                 startActivity(intent);
             }
         });

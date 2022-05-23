@@ -9,10 +9,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LocationImmo">
+        <activity
+            android:name=".ConversationsActivity"
+            android:exported="false" />
+
         <service
             android:name=".DatabaseAccessService"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
 
         <activity
             android:name=".ChatActivity"

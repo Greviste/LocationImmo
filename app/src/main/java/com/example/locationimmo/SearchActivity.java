@@ -29,8 +29,8 @@ public class SearchActivity extends AppCompatActivity implements RecyclerInterfa
     //Load toutes les activitées de la bd
     ArrayList<RentalAd> rental_ads_list;
     User user;
-    DatabaseAccessService service;
     RecyclerAdapter adapter;
+    DatabaseAccessService service;
 
     ServiceConnection connection = new ServiceConnection() {
 
@@ -228,10 +228,8 @@ public class SearchActivity extends AppCompatActivity implements RecyclerInterfa
 
         //client -> possibilité de save l'annonce
         if(user != null){
-            if(user.type.ordinal() == 0){
-                intent.putExtra("connectedMail", user.email);
-                intent.putExtra("connectedPassword", user.password);
-            }
+            intent.putExtra("connectedMail", user.email);
+            intent.putExtra("connectedPassword", user.password);
         }
 
         startActivity(intent);
