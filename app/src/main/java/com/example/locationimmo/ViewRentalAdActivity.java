@@ -85,8 +85,7 @@ public class ViewRentalAdActivity extends AppCompatActivity {
                         ad.description.equals(ad_data.get(2)) &&
                         ad.price == Float.parseFloat(ad_data.get(3))
                 )[0];
-
-                ad_to_save.owner = user;
+                ad_to_save.savers.add(user);
                 user.ads.add(ad_to_save);
 
                 Intent intent = new Intent(getApplicationContext(), SearchActivity.class);

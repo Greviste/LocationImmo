@@ -120,13 +120,25 @@ public class SearchActivity extends AppCompatActivity implements RecyclerInterfa
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 //Si click sur un item != R.id.show_all -> afficher la liste des ads de l'utilisateur
-                System.out.println("CLICKED ON " + menuItem.toString());
                 if(menuItem.getItemId() == R.id.show_posted || menuItem.getItemId() == R.id.show_fav){
+                    boolean fav = false;
+                    if(menuItem.getItemId() == R.id.show_fav){
+                        fav = true;
+                    }
                     //Filtre: ne montrer que les annonces liées a l'utilisateur
                     ArrayList<RentalAd> filtered = new ArrayList<>();
                     for(RentalAd ad : rental_ads_list){
-                        if(ad.owner.equals(user))
-                            filtered.add(ad);
+                        if(fav){
+                           for(User u : ad.savers){
+                               if(u.equals(user)){
+                                   filtered.add(ad);
+                               }
+                           }
+                        }else{
+                            if(ad.owner.equals(user))
+                                filtered.add(ad);
+                        }
+
                     }
 
                     rental_ads_list.clear();

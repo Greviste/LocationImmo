@@ -29,7 +29,6 @@ public class ChatActivity extends AppCompatActivity {
 
         for(ChatMessage msg : service.getConversation(us, them)){
             LinearLayout msg_item = new LinearLayout(this);
-            System.out.println("MESSAGE " + msg.message);
             TextView msg_tv = new TextView(getApplicationContext());
             msg_tv.setText(msg.message);
             msg_tv.setLayoutParams(params);
@@ -39,7 +38,6 @@ public class ChatActivity extends AppCompatActivity {
             if(msg.from.equals(us)){
                 //layout aligner le message à gauche
                 msg_tv.setBackgroundColor(Color.WHITE);
-
                 msg_item.setGravity(Gravity.LEFT);
             }else{
                 //layout aligner le msg à droite
@@ -65,7 +63,6 @@ public class ChatActivity extends AppCompatActivity {
             us = service.getUserByMailAndPassword(getIntent().getStringExtra("us_mail"), getIntent().getStringExtra("us_password"));
             them = service.getUserByMail(getIntent().getStringExtra("them_mail"));
 
-            System.out.println("CONVERSATION OPEN: " + us.email + " (us) talking to " + them.email);
             history = findViewById(R.id.messageHistory);
             updateHistory();
         }

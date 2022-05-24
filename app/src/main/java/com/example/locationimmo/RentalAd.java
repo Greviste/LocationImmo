@@ -1,6 +1,7 @@
 package com.example.locationimmo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
 
@@ -11,6 +12,7 @@ public class RentalAd implements Serializable {
     public ContactType contact;
     public Float price;
     public User owner;
+    public ArrayList<User> savers = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
